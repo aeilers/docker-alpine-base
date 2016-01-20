@@ -7,16 +7,15 @@
 DIVIDER="===================="
 TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
 
-printf "${TEMPLATE}" "Installing Alpine Linux Packages"
+###
+# NOTE: packages for env improvements are a personal preference here...
+#   - bash-completion coreutils grep tree
+###
+printf "${TEMPLATE}" "Installing Alpine Linux Packages for Base"
 
-###
-# NOTE: packages for env improvements are another personal preference here...
-#   - bash-completion coreutils grep openssh tree
-###
 apk add \
     coreutils \
     grep \
-    openssh \
     tree
 
 # remove apk cache and list

@@ -15,66 +15,95 @@ then
 
     printf "${TEMPLATE}" "Creating User Account"
 
-    adduser -s /bin/bash -D -G wheel -S $1
-    printf "$1:`echo -n $2 | sha256sum`" | chpasswd -e
-
-    chown -R $1:root /opt
+    adduser -D -G wheel -s /bin/bash -S $1
+    printf "$1:$(printf "$2" | sha256sum)" | chpasswd -e
 
     mkdir -p ${HOME_DIR}/${WORK_DIR}
 
-    if [[ ${IMAGE_TYPE} == "dev" ]]
-    then
+    chown -R $1:wheel /opt
+    chown -R $1:wheel ${HOME_DIR}/${WORK_DIR}
 
-        printf "${TEMPLATE}" "Installing Alpine Linux Packages"
+    apk update
 
-        apk update && apk add \
-            samba \
-            samba-common-tools
-
-        printf "%s\n" \
-            "[global]" \
-            "security = user" \
-            "encrypt passwords = yes" \
-            "unix password sync = yes" \
-            "" \
-            "[${WORK_DIR}]" \
-            "path = ${HOME_DIR}/${WORK_DIR}" \
-            "available = yes" \
-            "valid users = $1" \
-            "read only = no" \
-            "browsable = yes" \
-            "public = yes" \
-            "writable = yes" \
-        >> /etc/samba/smb.conf
-
-        (echo "$2"; echo "$2") | smbpasswd -s -a $1
-
-    fi
-
+    # setup git if image project is passed
     if [[ ${IMAGE_PROJECT} ]]
     then
 
-        printf "${TEMPLATE}" "Installing Alpine Linux Packages"
+        printf "${TEMPLATE}" "Installing Alpine Linux Packages for Git"
 
-        apk update && apk add git
+        apk add \
+            git \
+            sudo
 
-        # setup credential memory cache
-        git config --global credential.helper cache
+        # check if SSH key is passed
+        if [[ $3 && $4 ]]
+        then
 
-        # increase cache timeout from default to 4 hours
-        git config --global credential.helper 'cache --timeout=28800'
+            # install ssh client
+            apk add openssh-client
 
-        printf "${TEMPLATE}" "Getting Project"
+            PREFIX="-----BEGIN RSA PRIVATE KEY-----"
+            SUFFIX="-----END RSA PRIVATE KEY-----"
 
-        (echo "$1"; echo "$2") | git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
+            printf "${TEMPLATE}" "Storing SSH Key"
 
+            mkdir -p ${HOME_DIR}/.ssh
+
+            # parse private key
+            TEMP="$3"
+            TEMP=${TEMP/#${PREFIX}/}
+            TEMP=${TEMP/%${SUFFIX}/}
+            TEMP="$(tr " " "\n" <<< ${TEMP})"
+
+            # create private and public keys
+            printf "%s\n" "${PREFIX}" "${TEMP}" "${SUFFIX}" > ${HOME_DIR}/.ssh/id_rsa
+            printf "$4" > ${HOME_DIR}/.ssh/id_rsa.pub
+
+            # get host info from project and add it to known_hosts
+            if [[ ${IMAGE_PROJECT} =~ @([\-A-Za-z0-9.]+): ]]
+            then
+                ssh-keyscan -H "${BASH_REMATCH[1]}" >> ${HOME_DIR}/.ssh/known_hosts
+            fi
+
+            chown -R $1:wheel ${HOME_DIR}/.ssh
+
+            chmod 600 ${HOME_DIR}/.ssh/id_rsa
+            chmod 644 ${HOME_DIR}/.ssh/id_rsa.pub
+            chmod 644 ${HOME_DIR}/.ssh/known_hosts
+
+            # TODO: checkout code using SSH and sudo -u ${USER_NAME} here
+            printf "${TEMPLATE}" "Getting Project"
+
+            sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
+
+        else
+
+            # setup credential memory cache
+            git config --global credential.helper cache
+
+            # increase cache timeout from default to 8 hours
+            git config --global credential.helper 'cache --timeout=28800'
+
+            # TODO: checkout code using HTTPS and sudo -u ${USER_NAME} here
+            printf "${TEMPLATE}" "Getting Project"
+
+            (printf "${USER_NAME}"; printf "${USER_PASS}") | sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
+
+        fi
+
+        # clean-up for prod deployment
         if [[ "${IMAGE_TYPE}" == "prod" ]]
         then
-            apk del git
+
+            apk del \
+                git \
+                openssh-client \
+                sudo
 
             rm -rf \
                 ${HOME_DIR}/${WORK_DIR}/.git \
                 ${HOME_DIR}/${WORK_DIR}/*.md
+
         fi
 
     fi

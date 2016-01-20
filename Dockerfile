@@ -6,7 +6,7 @@ MAINTAINER Adam Eilers <adam.eilers@gmail.com>
 # copy install scripts to image
 COPY ./script/* /opt/script/
 
-# add repositories, update, upgrade, and install bash and invoke environment install script
+# add repositories, update, upgrade, install bash, and invoke base install script
 RUN printf "%s\n" \
         "http://dl-1.alpinelinux.org/alpine/v3.3/main" \
         "http://dl-1.alpinelinux.org/alpine/v3.3/community" \
@@ -26,8 +26,10 @@ RUN printf "%s\n" \
 # NOTE: onbuild task to create user for project-specific images
 ONBUILD ARG USER_NAME
 ONBUILD ARG USER_PASS
-ONBUILD RUN bash /opt/script/userInstall.sh ${USER_NAME} ${USER_PASS}
+ONBUILD ARG USER_SSH
+ONBUILD ARG USER_SSH_PUB
+ONBUILD ARG IMAGE_PROJECT
+ONBUILD ARG IMAGE_TYPE="prod"
+ONBUILD RUN bash /opt/script/userInstall.sh "${USER_NAME}" "${USER_PASS}" "${USER_SSH}" "${USER_SSH_PUB}"
 
-# expose SSH port by default
-EXPOSE 22
 CMD ["/bin/bash"]
