@@ -71,7 +71,7 @@ then
             chmod 644 ${HOME_DIR}/.ssh/id_rsa.pub
             chmod 644 ${HOME_DIR}/.ssh/known_hosts
 
-            # TODO: checkout code using SSH and sudo -u ${USER_NAME} here
+            # checkout code using SSH as the user here
             printf "${TEMPLATE}" "Getting Project"
 
             sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
@@ -84,7 +84,7 @@ then
             # increase cache timeout from default to 8 hours
             git config --global credential.helper 'cache --timeout=28800'
 
-            # TODO: checkout code using HTTPS and sudo -u ${USER_NAME} here
+            # checkout code using HTTPS as the user here
             printf "${TEMPLATE}" "Getting Project"
 
             (printf "${USER_NAME}"; printf "${USER_PASS}") | sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
