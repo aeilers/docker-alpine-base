@@ -7,19 +7,7 @@ MAINTAINER Adam Eilers <adam.eilers@gmail.com>
 COPY ./script/* /opt/script/
 
 # add repositories, update, upgrade, install bash, and invoke base install script
-RUN printf "%s\n" \
-        "http://dl-1.alpinelinux.org/alpine/v3.3/main" \
-        "http://dl-1.alpinelinux.org/alpine/v3.3/community" \
-        "http://dl-2.alpinelinux.org/alpine/v3.3/main" \
-        "http://dl-2.alpinelinux.org/alpine/v3.3/community" \
-        "http://dl-3.alpinelinux.org/alpine/v3.3/main" \
-        "http://dl-3.alpinelinux.org/alpine/v3.3/community" \
-        "http://dl-4.alpinelinux.org/alpine/v3.3/main" \
-        "http://dl-4.alpinelinux.org/alpine/v3.3/community" \
-        "http://dl-5.alpinelinux.org/alpine/v3.3/main" \
-        "http://dl-5.alpinelinux.org/alpine/v3.3/community" \
-    > /etc/apk/repositories \
-    && apk update && apk upgrade \
+RUN apk update && apk upgrade \
     && apk add bash-completion \
     && bash /opt/script/baseInstall.sh
 
