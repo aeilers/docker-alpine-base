@@ -4,11 +4,11 @@
 # user install script for Alpine Linux on Docker
 ###
 
+DIVIDER="===================="
+TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
+
 if [[ "${EUID}" == "0" && $1 && $2 ]]
 then
-
-    DIVIDER="===================="
-    TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
 
     HOME_DIR="/home/$1"
     WORK_DIR="workspace"
