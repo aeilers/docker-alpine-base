@@ -3,24 +3,23 @@
 ###
 # environment install script for Alpine Linux on Docker
 ###
+runBase () {
+    local DIVIDER="===================="
+    local TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
 
-DIVIDER="===================="
-TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
+    ###
+    # NOTE: packages for env improvements are a personal preference here...
+    #   - bash-completion coreutils grep tree
+    ###
+    printf "${TEMPLATE}" "Installing Alpine Linux Packages for Base"
+    apk add \
+        coreutils \
+        grep \
+        tree
 
-###
-# NOTE: packages for env improvements are a personal preference here...
-#   - bash-completion coreutils grep tree
-###
-printf "${TEMPLATE}" "Installing Alpine Linux Packages for Base"
+    # remove apk cache and list
+    printf "${TEMPLATE}" "Removing Alpine Linux Package Cache and /tmp"
+    clearApkCache
+}
 
-apk add \
-    coreutils \
-    grep \
-    tree
-
-# remove apk cache and list
-printf "${TEMPLATE}" "Removing Alpine Linux Package Cache and /tmp"
-
-rm -rf \
-    /tmp/* \
-    /var/cache/apk/*
+source /etc/profile && runBase
