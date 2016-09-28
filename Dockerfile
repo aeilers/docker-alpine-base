@@ -1,5 +1,5 @@
 # start with Alpine distro
-FROM alpine:3.3
+FROM alpine:3.4
 
 MAINTAINER Adam Eilers <adam.eilers@gmail.com>
 

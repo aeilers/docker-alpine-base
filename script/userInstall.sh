@@ -2,6 +2,10 @@
 
 ###
 # user install script for Alpine Linux on Docker
+# $1 - user name
+# $2 - user password
+# $3 - user private ssh key
+# $4 - user public ssh key
 ###
 runUser () {
     local DIVIDER="===================="
