@@ -48,7 +48,9 @@ runUser () {
 }
 
 ###
-# setup functions for user and project variants
+# setup basic user
+# $1 - user name
+# $2 - user password
 ###
 setupUser () {
     export HOME_DIR="/home/$1"
@@ -65,6 +67,13 @@ setupUser () {
     apk update
 }
 
+###
+# setup user ssh project
+# $1 - user name
+# $2 - user password
+# $3 - user private ssh key
+# $4 - user public ssh key
+###
 setupSshProject () {
     # install ssh client
     apk add openssh-client
@@ -100,6 +109,11 @@ setupSshProject () {
     sudo -u $1 git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
 }
 
+###
+# setup user https project
+# $1 - user name
+# $2 - user password
+###
 setupUserProject () {
     # setup credential memory cache
     git config --global credential.helper cache
@@ -112,7 +126,7 @@ setupUserProject () {
 }
 
 ###
-# helper functions
+# clear cache
 ###
 clearUserInstallCache () {
     apk del \
@@ -125,6 +139,10 @@ clearUserInstallCache () {
         ${HOME_DIR}/${WORK_DIR}/*.md
 }
 
+###
+# setup user git config
+# $1 - user name
+###
 setupGit () {
     apk add \
         git \
