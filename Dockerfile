@@ -21,4 +21,5 @@ ONBUILD ARG IMAGE_PROJECT
 ONBUILD ARG IMAGE_TYPE="production"
 ONBUILD RUN bash /opt/script/userInstall.sh
 
+EXPOSE 22
 CMD ["/bin/bash"]
