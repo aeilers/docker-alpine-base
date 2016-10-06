@@ -11,13 +11,13 @@ runUser () {
     local DIVIDER="===================="
     local TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
 
-    if [[ "${EUID}" == "0" && ${USER_NAME} && ${USER_PASS} ]]
+    if [[ "${EUID}" == "0" ]]
     then
         printf "${TEMPLATE}" "Creating User Account"
         setupUser
 
-        printf "${TEMPLATE}" "Installing Alpine Linux Packages for Git"
-        setupGit
+        printf "${TEMPLATE}" "Installing Alpine Linux Packages for Environment"
+        setupEnvironment
 
         # setup git if image project is passed
         if [[ ${IMAGE_PROJECT} ]]
@@ -39,7 +39,7 @@ runUser () {
             clearUserInstallCache
         fi
     else
-        printf "${TEMPLATE}" "User must be root and username password must be supplied."
+        printf "${TEMPLATE}" "User must be root to run this script."
     fi
 
     # remove apk cache and list
@@ -126,6 +126,8 @@ setupUserProject () {
 ###
 clearUserInstallCache () {
     apk del \
+        docker \
+        docker-bash-completion \
         git \
         openssh-client \
         sudo
@@ -139,8 +141,10 @@ clearUserInstallCache () {
 # setup user git config
 # ${USER_NAME} - user name
 ###
-setupGit () {
+setupEnvironment () {
     apk add \
+        docker \
+        docker-bash-completion \
         git \
         openssh-client \
         sudo
