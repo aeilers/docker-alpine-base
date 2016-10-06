@@ -2,41 +2,41 @@
 
 ###
 # user install script for Alpine Linux on Docker
-# $1 - user name
-# $2 - user password
-# $3 - user private ssh key
-# $4 - user public ssh key
+# ${USER_NAME} - user name
+# ${USER_PASS} - user password
+# ${USER_SSH} - user private ssh key
+# ${USER_SSH_PUB} - user public ssh key
 ###
 runUser () {
     local DIVIDER="===================="
     local TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
 
-    if [[ "${EUID}" == "0" && $1 && $2 ]]
+    if [[ "${EUID}" == "0" && ${USER_NAME} && ${USER_PASS} ]]
     then
         printf "${TEMPLATE}" "Creating User Account"
-        setupUser $1 $2
+        setupUser
+
+        printf "${TEMPLATE}" "Installing Alpine Linux Packages for Git"
+        setupGit
 
         # setup git if image project is passed
         if [[ ${IMAGE_PROJECT} ]]
         then
-            printf "${TEMPLATE}" "Installing Alpine Linux Packages for Git"
-            setupGit $1
-
-            if [[ $3 && $4 ]]
+            if [[ ${USER_SSH} && ${USER_SSH_PUB} ]]
             then
                 printf "${TEMPLATE}" "Setup SSH Project"
-                setupSshProject $1 $2 $3 $4
+                setupSshProject
             else
                 printf "${TEMPLATE}" "Setup User Project"
-                setupUserProject $1 $2
+                setupUserProject
             fi
+        fi
 
-            # clean-up for prod deployment
-            if [[ "${IMAGE_TYPE}" == "production" ]]
-            then
-                printf "${TEMPLATE}" "Clear User Install Cache"
-                clearUserInstallCache
-            fi
+        # clean-up for prod deployment
+        if [[ "${IMAGE_TYPE}" == "production" ]]
+        then
+            printf "${TEMPLATE}" "Clear User Install Cache"
+            clearUserInstallCache
         fi
     else
         printf "${TEMPLATE}" "User must be root and username password must be supplied."
@@ -49,49 +49,45 @@ runUser () {
 
 ###
 # setup basic user
-# $1 - user name
-# $2 - user password
+# ${USER_NAME} - user name
+# ${USER_PASS} - user password
 ###
 setupUser () {
-    export HOME_DIR="/home/$1"
+    export HOME_DIR="/home/${USER_NAME}"
     export WORK_DIR="workspace"
 
-    adduser -D -G wheel -s /bin/bash -S $1
-    printf "$1:$(printf "$2" | sha256sum)" | chpasswd -e
+    adduser -D -G wheel -s /bin/bash -S ${USER_NAME}
+    printf "${USER_NAME}:$(printf "${USER_PASS}" | sha256sum)" | chpasswd -e
 
     mkdir -p ${HOME_DIR}/${WORK_DIR}
 
-    chown -R $1:wheel /opt
-    chown -R $1:wheel ${HOME_DIR}/${WORK_DIR}
+    chown -R ${USER_NAME}:wheel /opt
+    chown -R ${USER_NAME}:wheel ${HOME_DIR}/${WORK_DIR}
 
     apk update
 }
 
 ###
 # setup user ssh project
-# $1 - user name
-# $2 - user password
-# $3 - user private ssh key
-# $4 - user public ssh key
+# ${USER_NAME} - user name
+# ${USER_SSH} - user private ssh key
+# ${USER_SSH_PUB} - user public ssh key
 ###
 setupSshProject () {
-    # install ssh client
-    apk add openssh-client
-
     local PREFIX="-----BEGIN RSA PRIVATE KEY-----"
     local SUFFIX="-----END RSA PRIVATE KEY-----"
 
     mkdir -p ${HOME_DIR}/.ssh
 
     # parse private key
-    local TEMP="$3"
+    local TEMP="${USER_SSH}"
     TEMP=${TEMP/#${PREFIX}/}
     TEMP=${TEMP/%${SUFFIX}/}
     TEMP="$(tr " " "\n" <<< ${TEMP})"
 
     # create private and public keys
     printf "%s\n" "${PREFIX}" "${TEMP}" "${SUFFIX}" > ${HOME_DIR}/.ssh/id_rsa
-    printf "$4" > ${HOME_DIR}/.ssh/id_rsa.pub
+    printf "${USER_SSH_PUB}" > ${HOME_DIR}/.ssh/id_rsa.pub
 
     # get host info from project and add it to known_hosts
     if [[ ${IMAGE_PROJECT} =~ @([\-A-Za-z0-9.]+): ]]
@@ -99,20 +95,20 @@ setupSshProject () {
         ssh-keyscan -H "${BASH_REMATCH[1]}" >> ${HOME_DIR}/.ssh/known_hosts
     fi
 
-    chown -R $1:wheel ${HOME_DIR}/.ssh
+    chown -R ${USER_NAME}:wheel ${HOME_DIR}/.ssh
 
     chmod 600 ${HOME_DIR}/.ssh/id_rsa
     chmod 644 ${HOME_DIR}/.ssh/id_rsa.pub
     chmod 644 ${HOME_DIR}/.ssh/known_hosts
 
     # checkout code using SSH as the user here
-    sudo -u $1 git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
+    sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
 }
 
 ###
 # setup user https project
-# $1 - user name
-# $2 - user password
+# ${USER_NAME} - user name
+# ${USER_PASS} - user password
 ###
 setupUserProject () {
     # setup credential memory cache
@@ -122,7 +118,7 @@ setupUserProject () {
     git config --global credential.helper 'cache --timeout=28800'
 
     # checkout code using HTTPS as the user here
-    (printf "$1"; printf "$2") | sudo -u $1 git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
+    (printf "${USER_NAME}"; printf "${USER_PASS}") | sudo -u ${USER_NAME} git clone ${IMAGE_PROJECT} ${HOME_DIR}/${WORK_DIR}
 }
 
 ###
@@ -141,22 +137,21 @@ clearUserInstallCache () {
 
 ###
 # setup user git config
-# $1 - user name
+# ${USER_NAME} - user name
 ###
 setupGit () {
     apk add \
         git \
+        openssh-client \
         sudo
 
-    git config --global user.name "$1"
+    git config --global user.name "${USER_NAME}"
 }
 
 ###
 # main
 ###
-source /etc/profile
-
-if [[ $1 && $2 ]]
+if [[ ${USER_NAME} && ${USER_PASS} ]]
 then
-    runUser $1 $2 $3 $4
+    source /etc/profile && runUser
 fi

@@ -19,6 +19,6 @@ ONBUILD ARG USER_SSH
 ONBUILD ARG USER_SSH_PUB
 ONBUILD ARG IMAGE_PROJECT
 ONBUILD ARG IMAGE_TYPE="production"
-ONBUILD RUN bash /opt/script/userInstall.sh "${USER_NAME}" "${USER_PASS}" "${USER_SSH}" "${USER_SSH_PUB}"
+ONBUILD RUN bash /opt/script/userInstall.sh
 
 CMD ["/bin/bash"]
