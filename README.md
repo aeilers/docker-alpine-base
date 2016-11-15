@@ -1,18 +1,18 @@
 # docker-alpine-base
 
-Contains the Dockerfile and supporting install scripts for a Base [Alpine Linux](http://alpinelinux.org/) Docker image. (~15MB virtual size)
+Contains the Dockerfile and supporting install scripts for a Base [Alpine Linux](http://alpinelinux.org/) Docker image. (~7MB compressed)(~16MB virtual size)
 
 ## Purpose
 
 A few reasons:
 
-- To provide a base set of tools in a more familiar shell,
-- To provide additional script(s) for inheriting images,
-- And to implement a single environment setup with minor variations for Development and Production images.
+- To provide a base set of tools in a more familiar shell with Bash,
+- To provide additional script(s) for inheriting images to provide additional uses,
+- And to implement a single environment setup that can be reused for development, continuous integration, and production environments.
 
 ### Base set of tools
 
-The tools provided are the [Bash shell w/ autocomplete](https://pkgs.alpinelinux.org/package/main/x86_64/bash-completion), full functionality for [common commands](https://pkgs.alpinelinux.org/package/main/x86_64/coreutils), fully functional [grep](https://pkgs.alpinelinux.org/package/main/x86_64/grep), and [recursive directory listing](https://pkgs.alpinelinux.org/package/main/x86_64/tree) capabilities. This is where most of the extra image size comes from with about ~10MB extra for all these features.
+The tools provided are [Bash shell w/ autocomplete](https://pkgs.alpinelinux.org/package/main/x86_64/bash-completion), full functionality for [common commands](https://pkgs.alpinelinux.org/package/main/x86_64/coreutils), fully functional [grep](https://pkgs.alpinelinux.org/package/main/x86_64/grep), and [recursive directory listing](https://pkgs.alpinelinux.org/package/main/x86_64/tree) capabilities. This is where most of the extra image size comes from with about ~11MB extra.
 
 ### Additional scripts
 
@@ -24,14 +24,14 @@ The user install script handles numerous tasks based on various settings passed 
 
 ### Image variations
 
-This is an attempt to, above all else, maintain consistency in environments from Development to Production. Alpine Linux starts ridiculously small at ~5MB. With the Base additions included in this image, it goes up to ~15MB. With their package manager, you simply start small and add what you need to achieve your final results. Sure Git adds a bit more to the Development image but consider CentOS7 starting at 194MB in comparison.
+This is an attempt to, above all else, maintain consistency in environments from Development to Production. Alpine Linux starts ridiculously small at ~5MB. With the Base additions included in this image, it goes up to ~16MB. With their package manager, you simply start small and add what you need to achieve your final results. With the provided scripts and extra packages, we can reuse the same container for all stages of our code. From here, we need to just add application base layer dependencies.
 
 ## Usage
 
-This is a Base image, therefore not intended on being used directly. Child images need to specify the [FROM](https://docs.docker.com/engine/reference/builder/#from) keyword in their Dockerfile to point to this image.
+This is a Base image, therefore not intended on being used directly but inherited from. Child images need to specify the [FROM](https://docs.docker.com/engine/reference/builder/#from) keyword in their Dockerfile to point to this image.
 
 ```
-FROM aeilers/alpine-base:2.0.0
+FROM aeilers/alpine-base:2.0.1
 ```
 
 Additionally, if you want to use the user install script in child/grandchild images, you will need to add the following [ONBUILD](https://docs.docker.com/engine/reference/builder/#onbuild) lines in the same Dockerfile.
@@ -42,10 +42,20 @@ ONBUILD ARG USER_PASS
 ONBUILD ARG USER_SSH
 ONBUILD ARG USER_SSH_PUB
 ONBUILD ARG IMAGE_PROJECT
-ONBUILD ARG IMAGE_TYPE="prod"
+ONBUILD ARG IMAGE_TYPE="production"
 ONBUILD RUN bash /opt/script/userInstall.sh ${USER_NAME} ${USER_PASS}
 ```
 
 ## Change Log
 
--
+- 2.0.1
+  - updated Alpine Linux base image to same some MBs
+- 2.0.0
+  - major overhaul to scripts and updated to Alpine Linux 3.4
+- 1.0.2
+  - updated Alpine Linux base image
+- 1.0.1
+  - removed additional package repositories
+  - fixed bug with messaging
+- 1.0.0
+  - ipo
