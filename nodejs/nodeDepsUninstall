@@ -31,9 +31,7 @@ clearNodeInstallCache () {
         g++ \
         gcc \
         gnupg \
-        libgcc \
         libpng-dev \
-        libstdc++ \
         libtool \
         libuv-dev \
         linux-headers \
