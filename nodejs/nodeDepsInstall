@@ -12,12 +12,6 @@ runNode () {
     ###
     printf "${TEMPLATE}" "Installing Alpine Linux Packages for Node.js"
     setupDependencies
-
-    ###
-    # NOTE: add additional file/folder removal here for all images
-    ###
-    printf "${TEMPLATE}" "Removing unnecessary files"
-    clearApkCache
 }
 
 ###

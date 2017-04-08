@@ -39,11 +39,6 @@ runProject () {
     # NOTE: remove any additional project-specific files/folders
     ###
     printf "${TEMPLATE}" "Clearing Node and NPM cache"
-    clearProjectInstallCache
-    clearApkCache
-}
-
-clearProjectInstallCache () {
     rm -rf \
         ${HOME_DIR}/.npm \
         ${HOME_DIR}/.node-gyp

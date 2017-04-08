@@ -12,7 +12,6 @@ runNode () {
     ###
     printf "${TEMPLATE}" "Removing Alpine Linux Packages for Node.js"
     clearNodeInstallCache
-    clearApkCache
 }
 
 ###

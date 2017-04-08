@@ -16,10 +16,6 @@ runBase () {
         coreutils \
         grep \
         tree
-
-    # remove apk cache and list
-    printf "${TEMPLATE}" "Removing Alpine Linux Package Cache and /tmp"
-    clearApkCache
 }
 
 runBase && exit 0

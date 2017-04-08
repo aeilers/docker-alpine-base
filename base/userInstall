@@ -25,10 +25,6 @@ runUser () {
             printf "${TEMPLATE}" "Setup Standard User config"
             setupUser
         fi
-
-        # remove apk cache and list
-        printf "${TEMPLATE}" "Removing Alpine Linux Package Cache and /tmp"
-        clearApkCache
     else
         printf "${TEMPLATE}" "User must be root to run this script."
     fi
