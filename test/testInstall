@@ -1,0 +1,20 @@
+#!/bin/bash
+###
+# test install script for Alpine Linux on Docker
+###
+runTest () {
+    local DIVIDER="===================="
+    local TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
+
+    printf "${TEMPLATE}" "Installing Alpine Linux Packages for testing Chrome"
+    apk add \
+        chromium \
+        chromium-chromedriver \
+        dbus \
+        fontconfig \
+        ttf-freefont \
+        udev \
+        xvfb
+}
+
+runTest && exit 0
