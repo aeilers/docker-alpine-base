@@ -11,13 +11,6 @@ runNode () {
     # NOTE: additional packages for possible Node.js dependencies compile
     ###
     printf "${TEMPLATE}" "Installing Alpine Linux Packages for Node.js"
-    setupDependencies
-}
-
-###
-# setup node build dependencies that I've come across so far
-###
-setupDependencies () {
     apk update && apk add \
         autoconf \
         automake \

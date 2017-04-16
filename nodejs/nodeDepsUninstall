@@ -9,19 +9,9 @@ runNode () {
 
     ###
     # NOTE: add additional file/folder removal here for all images
+    # TODO: allow for subset to be passed for deletion
     ###
     printf "${TEMPLATE}" "Removing Alpine Linux Packages for Node.js"
-    clearNodeInstallCache
-}
-
-###
-# cleanup after node install
-# TODO: allow for subset to be passed for deletion
-###
-clearNodeInstallCache () {
-    ###
-    # NOTE: remove required packages for node/npm download and compile
-    ###
     apk del \
         autoconf \
         automake \
