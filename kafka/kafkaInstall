@@ -1,0 +1,42 @@
+#!/bin/bash
+
+###
+# node install script for Alpine Linux on Docker
+###
+runKafka () {
+    local DIVIDER="===================="
+    local TEMPLATE="\n\n${DIVIDER}${DIVIDER}${DIVIDER}\n%s\n\n\n"
+
+    ###
+    # NOTE: install Kafka build dependencies
+    ###
+    printf "${TEMPLATE}" "Installing Kafka dependencies"
+    apk add \
+        curl \
+        jq \
+        tar
+
+    ###
+    # NOTE: download and install Kafka
+    ###
+    printf "${TEMPLATE}" "Installing Kafka"
+    local mirror=$(curl --stderr /dev/null https://www.apache.org/dyn/closer.cgi\?as_json\=1 | jq -r '.preferred')
+    local url="${mirror}kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz"
+
+    mkdir -p ${KAFKA_HOME}
+    mkdir -p ${KAFKA_LOGS}
+
+    curl --progress-bar "${url}" --output "/tmp/kafka.tgz"
+
+    tar -zxvf /tmp/kafka.tgz -C ${KAFKA_HOME} --strip-components 1
+
+    ###
+    # NOTE: clean-up download dependencies
+    ###
+    apk del \
+        curl \
+        jq \
+        tar
+}
+
+runKafka && exit 0

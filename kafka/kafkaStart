@@ -1,0 +1,70 @@
+#!/bin/bash
+
+KAFKA_PID=0
+
+# see https://medium.com/@gchudnov/trapping-signals-in-docker-containers-7a57fdda7d86#.bh35ir4u5
+termHandler() {
+    local TEMPLATE="\n\n%s\n\n\n"
+
+    printf "${TEMPLATE}" "Stopping Kafka..."
+    if [[ ${KAFKA_PID} -ne 0 ]]; then
+        kill -s TERM "${KAFKA_PID}"
+        wait "${KAFKA_PID}"
+    fi
+
+    printf "${TEMPLATE}" "Kafka stopped."
+    exit
+}
+
+createTopics() {
+    local TEMPLATE="\n\n%s\n\n\n"
+
+    local START_TIMEOUT=600
+    local START_TIMEOUT_EXCEEDED=false
+    local COUNT=0
+    local STEP=30
+
+    while netstat -lnt | awk '$4 ~ /:'${KAFKA_PORT}'$/ {exit 1}'; do
+        printf "${TEMPLATE}" "waiting for Kafka to be ready..."
+
+        sleep ${STEP};
+
+        COUNT=$(expr ${COUNT} + ${STEP})
+        if [[ ${COUNT} -gt ${START_TIMEOUT} ]]; then
+            START_TIMEOUT_EXCEEDED=true
+            break
+        fi
+    done
+
+    if ${START_TIMEOUT_EXCEEDED}; then
+        printf "${TEMPLATE}" "Not able to auto-create topics (waited for ${START_TIMEOUT} sec)"
+        exit 1
+    fi
+
+    if [[ -n "${KAFKA_CREATE_TOPICS}" ]]; then
+        IFS=","; for topicToCreate in ${KAFKA_CREATE_TOPICS}
+        do
+            IFS=":" read -a topicConfig <<< "${topicToCreate}"
+
+            if [[ -n "$(${KAFKA_HOME}/bin/kafka-topics.sh --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --topic ${topicConfig[0]} --describe)" ]]; then
+                printf "${TEMPLATE}" "Topic ${topicToCreate} has already been created!"
+            else
+                printf "${TEMPLATE}" "Creating Topic: ${topicToCreate}"
+                ${KAFKA_HOME}/bin/kafka-topics.sh --create --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --replication-factor ${topicConfig[2]} --partition ${topicConfig[1]} --topic ${topicConfig[0]}
+            fi
+        done
+    fi
+}
+
+runKafka() {
+    # Capture kill requests to stop properly
+    trap "termHandler" SIGHUP SIGINT SIGTERM
+
+    createTopics &
+    ${KAFKA_HOME}/bin/kafka-server-start.sh ${KAFKA_HOME}/config/server.properties &
+    KAFKA_PID=$!
+
+    wait "${KAFKA_PID}"
+}
+
+runKafka && exit 0
