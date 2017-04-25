@@ -16,6 +16,13 @@ runBase () {
         coreutils \
         grep \
         tree
+
+    ###
+    # NOTE: check if DEV_ENV, DEV_UID, and DEV_USER are defined to setup dev user
+    ###
+    if [[ "${DEV_ENV}" == "linux" && -n "${DEV_UID}" && -n "${DEV_USER}" ]]; then
+        adduser -u ${DEV_UID} -D ${DEV_USER}
+    fi
 }
 
 runBase && exit 0
