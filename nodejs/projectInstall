@@ -11,7 +11,7 @@ runProject () {
 
     if [[ "${NODE_ENV}" == "production" ]]; then
         printf "${TEMPLATE}" "Installing (Production) Node.js Dependencies"
-        npm install --quiet --production
+        npm install --quiet --no-optional --production
     else
 
         if [[ -f ./package.json ]]; then
@@ -23,7 +23,7 @@ runProject () {
             # e.g. npm install --quiet -g gulp-cli
 
             printf "${TEMPLATE}" "Installing (All) Node.js Dependencies"
-            npm install --quiet
+            npm install --quiet --no-optional
         fi
 
         if [[ -f ./bower.json ]]
