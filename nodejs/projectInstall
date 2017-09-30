@@ -30,7 +30,7 @@ runProject () {
         then
             printf "${TEMPLATE}" "Installing Bower Dependencies"
             npm install --quiet -g bower
-            bower install
+            bower install --allow-root
         fi
 
     fi
