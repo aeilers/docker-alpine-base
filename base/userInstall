@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###
 # user install script for Alpine Linux on Docker
@@ -111,4 +111,4 @@ setupUser () {
 ###
 # run user install script
 ###
-runUser ${1} ${2} ${3} ${4} && exit 0
+runUser ${1} ${2} ${3} ${4}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 clearApkCache () {
     rm -rf \
@@ -9,4 +9,4 @@ clearApkCache () {
 ###
 # run clear apk cache script
 ###
-clearApkCache && exit 0
+clearApkCache

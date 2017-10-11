@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 ###
 # test install script for Alpine Linux on Docker
 ###
@@ -17,4 +18,4 @@ runTest () {
         xvfb
 }
 
-runTest && exit 0
+runTest

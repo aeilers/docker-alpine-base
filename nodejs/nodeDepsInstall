@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###
 # node install script for Alpine Linux on Docker
@@ -34,4 +34,4 @@ runNode () {
         zlib-dev
 }
 
-runNode && exit 0
+runNode

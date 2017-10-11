@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###
 # project install script for project dependencies
@@ -44,4 +44,4 @@ runProject () {
         ${HOME_DIR}/.node-gyp
 }
 
-runProject && exit 0
+runProject

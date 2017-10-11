@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 KAFKA_PID=0
 
@@ -67,4 +67,4 @@ runKafka() {
     wait "${KAFKA_PID}"
 }
 
-runKafka && exit 0
+runKafka
